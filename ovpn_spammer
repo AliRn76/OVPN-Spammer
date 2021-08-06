@@ -10,14 +10,18 @@ from pyfiglet import Figlet
 
 config_path = None
 ovpns = []
+show_log = False
 dc_time = None
 
 async def connect_ovpn(x: int):
     global config_path
+    global show_log
     global ovpns
 
-    ovpn = Popen(['openvpn', '--auth-nocache', '--config', config_path], stdout=PIPE, stderr=STDOUT)
-    # ovpn = Popen(['openvpn', '--auth-nocache', '--config', config_path])
+    if show_log:
+        ovpn = Popen(['openvpn', '--auth-nocache', '--config', config_path])
+    else:
+        ovpn = Popen(['openvpn', '--auth-nocache', '--config', config_path], stdout=PIPE, stderr=STDOUT)
     """
     ['__class__', '__del__', '__delattr__', '__dict__', '__dir__', '__doc__', '__enter__', '__eq__', '__exit__', 
     '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', 
@@ -48,26 +52,31 @@ async def main(number: int):
 
 def init() -> int:
     global config_path
+    global show_log
     global dc_time
     f = Figlet(font='standard')
     print(colored(f.renderText('OVPN Spammer'), 'green'))
     print(colored('Created by github.com/AliRn76\n', 'blue'))
 
     # Help
-    if sys.argv[1] in ['-h', '--help']:
-        print(colored('\n** Help: You can pass the arguments like this:\n', 'cyan'))
-        print(colored('./ovpn_spammer {first_value} {second_value} {third_value} \n', 'cyan'))
-        print(colored(' -------------------------------------------------------------------------------------', 'magenta'))
-        print(colored('|first_value  ---> number of connections (should be int) ', 'cyan'))
-        print(colored('|', 'magenta'))
-        print(colored('|second_value ---> connections will disconnected after {second_value} seconds\n'
-                      '|                  you can pass the 0 if you don\'t want to disconnect automatically', 'cyan'))
-        print(colored('|', 'magenta'))
-        print(colored('|third_value  ---> path of ovpn config (~/something/like/this.ovpn)', 'cyan'))
-        print(colored('|', 'magenta'))
-        print(colored(' -------------------------------------------------------------------------------------', 'magenta'))
-
-        return 0
+    try:
+        if sys.argv[1] in ['-h', '--help']:
+            print(colored('\n** Help: You can pass the arguments like this:\n', 'cyan'))
+            print(colored('./ovpn_spammer {first_value} {second_value} {third_value} {fourth_value} \n', 'cyan'))
+            print(colored(' -------------------------------------------------------------------------------------', 'magenta'))
+            print(colored('|first_value  ---> number of connections (should be int) ', 'cyan'))
+            print(colored('|', 'magenta'))
+            print(colored('|second_value ---> connections will disconnected after {second_value} seconds\n'
+                          '|                  you can pass the 0 if you don\'t want to disconnect automatically', 'cyan'))
+            print(colored('|', 'magenta'))
+            print(colored('|third_value  ---> path of ovpn config (~/something/like/this.ovpn)', 'cyan'))
+            print(colored('|', 'magenta'))
+            print(colored('|fourth_value ---> 1 will show the log and 0 will not (default is 0)', 'cyan'))
+            print(colored('|', 'magenta'))
+            print(colored(' -------------------------------------------------------------------------------------', 'magenta'))
+            return 0
+    except IndexError:
+        pass
 
     # Number Of Connections
     valid_number = False
@@ -123,9 +132,32 @@ def init() -> int:
         print(colored(f'Config path is: {config_path}', 'yellow'))
     except IndexError:
         pass
-
     if config_path is None:
         config_path = input(colored('Where is the config file ? ("./ovpn.conf") ', 'yellow'))
+
+    # Show Log
+    valid_log = False
+    try:
+        show_log = int(sys.argv[4])
+        if show_log in [0, 1]:
+            valid_log = True
+            if show_log == 1:
+                show_log = True
+    except ValueError:
+        pass
+    except IndexError:
+        pass
+
+    if not valid_log:
+        log = None
+        while log not in ['n', 'N', 'y', 'Y']:
+            log = input(colored('Do you want to see the logs ? (y/n) ', 'yellow'))
+        show_log = True if log in ['y', 'Y'] else False
+
+    if show_log:
+        print(colored(f'You will see the logs', 'yellow'))
+    else:
+        print(colored(f'You won\'t see the logs', 'yellow'))
 
     return number
 
