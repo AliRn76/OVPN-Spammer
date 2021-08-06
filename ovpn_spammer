@@ -54,9 +54,9 @@ def init() -> int:
     global config_path
     global show_log
     global dc_time
-    f = Figlet(font='standard')
+    f = Figlet(font='smkeyboard')
     print(colored(f.renderText('OVPN Spammer'), 'green'))
-    print(colored('Created by github.com/AliRn76\n', 'blue'))
+    print(colored(f.renderText('Created by: Ali Rn\n'), 'blue'))
 
     # Help
     try:
